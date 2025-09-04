@@ -1,0 +1,27 @@
+[
+  {
+    "content": "查看当前主页结构，定位'实时访问统计'按钮位置",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "在'实时访问统计'左边添加'技术博客'按钮",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "创建技术博客页面 (blog.html)",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "编写脚本搜集/mnt/www中技术博客相关的html文件",
+    "status": "completed",
+    "id": "4"
+  },
+  {
+    "content": "设置每天晚上1点的定时任务自动运行博客搜集脚本",
+    "status": "completed",
+    "id": "5"
+  }
+]

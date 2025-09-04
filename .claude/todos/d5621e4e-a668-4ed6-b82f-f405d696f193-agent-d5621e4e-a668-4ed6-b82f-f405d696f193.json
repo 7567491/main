@@ -1,0 +1,17 @@
+[
+  {
+    "content": "查看nginx站点配置文件列表",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "检查各二级域名的SSL证书状态",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "查看主配置文件内容",
+    "status": "completed",
+    "id": "3"
+  }
+]

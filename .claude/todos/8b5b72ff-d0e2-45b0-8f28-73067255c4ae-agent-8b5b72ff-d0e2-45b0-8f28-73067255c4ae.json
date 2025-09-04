@@ -1,0 +1,22 @@
+[
+  {
+    "content": "更新domain_stats_ranking.sh生成Top7排行而不是Top6",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "更新update_homepage_simple.py读取Top7数据",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "更新相关的文件路径和变量名",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "测试Top7系统是否正常工作",
+    "status": "completed",
+    "id": "4"
+  }
+]

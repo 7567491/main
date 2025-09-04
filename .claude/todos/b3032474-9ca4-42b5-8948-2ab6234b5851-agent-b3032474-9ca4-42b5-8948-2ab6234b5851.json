@@ -1,0 +1,32 @@
+[
+  {
+    "content": "创建.gitignore文件，排除日志、缓存和敏感文件",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "初始化git仓库",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "添加所有文件到git",
+    "status": "in_progress",
+    "id": "3"
+  },
+  {
+    "content": "创建初始提交",
+    "status": "pending",
+    "id": "4"
+  },
+  {
+    "content": "配置GitHub远程仓库",
+    "status": "pending",
+    "id": "5"
+  },
+  {
+    "content": "推送到GitHub",
+    "status": "pending",
+    "id": "6"
+  }
+]

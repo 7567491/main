@@ -1,0 +1,52 @@
+[
+  {
+    "content": "分析当前存储桶依赖架构",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "检查s.linapp.fun域名配置",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "设计本地文件服务方案",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "创建反向代理方案",
+    "status": "completed",
+    "id": "4"
+  },
+  {
+    "content": "备份当前Nginx配置",
+    "status": "completed",
+    "id": "5"
+  },
+  {
+    "content": "修改Nginx配置为反向代理",
+    "status": "completed",
+    "id": "6"
+  },
+  {
+    "content": "恢复原始配置",
+    "status": "completed",
+    "id": "7"
+  },
+  {
+    "content": "创建自动挂载服务",
+    "status": "completed",
+    "id": "8"
+  },
+  {
+    "content": "创建挂载检查脚本",
+    "status": "completed",
+    "id": "9"
+  },
+  {
+    "content": "添加cron定时检查",
+    "status": "completed",
+    "id": "10"
+  }
+]

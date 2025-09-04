@@ -1,0 +1,89 @@
+{
+  "domains": {
+    "pr.linapp.fun": {
+      "short_name": "pr",
+      "display_name": "🤖 六页纸AI生成",
+      "title": "六页纸AI生成", 
+      "description": "AI生成工具，Streamlit应用，支持PRFAQ、产品设计等AI生成",
+      "port": 8501,
+      "enabled": true,
+      "icon": "🤖",
+      "color": "linear-gradient(45deg, #f44336, #d32f2f)"
+    },
+    "az.linapp.fun": {
+      "short_name": "az",
+      "display_name": "📊 云服务全球AZ可视化",
+      "title": "云服务全球AZ可视化",
+      "description": "云服务区域可视化系统，提供地图统计和数据分析服务",
+      "port": 5001,
+      "enabled": true,
+      "icon": "📊",
+      "color": "linear-gradient(45deg, #2196F3, #1976D2)"
+    },
+    "didi.linapp.fun": {
+      "short_name": "didi", 
+      "display_name": "👥 滴滴行程解析",
+      "title": "滴滴行程解析",
+      "description": "前端+API架构，从滴滴行程单一键解析成客户名称",
+      "port": 9001,
+      "enabled": true,
+      "icon": "👥",
+      "color": "linear-gradient(45deg, #FF9800, #F57C00)"
+    },
+    "pdf.linapp.fun": {
+      "short_name": "pdf",
+      "display_name": "📄 PDF翻译",
+      "title": "PDF翻译",
+      "description": "专业的论文/书籍AI翻译，需要自带llm api，支持deepseek等",
+      "port": 8888,
+      "enabled": true,
+      "icon": "📄",
+      "color": "linear-gradient(45deg, #4CAF50, #45a049)"
+    },
+    "vote.linapp.fun": {
+      "short_name": "vote",
+      "display_name": "🗳️ 在线投票",
+      "title": "在线投票",
+      "description": "投票中午去哪吃饭",
+      "port": 10001,
+      "enabled": true,
+      "icon": "🗳️",
+      "color": "linear-gradient(45deg, #9C27B0, #7B1FA2)"
+    },
+    "meet.linapp.fun": {
+      "short_name": "meet",
+      "display_name": "📱 会议室预订系统",
+      "title": "会议室预订系统",
+      "description": "会议室预订系统",
+      "port": 8000,
+      "enabled": true,
+      "icon": "📱",
+      "color": "linear-gradient(45deg, #FF5722, #D84315)"
+    },
+    "6page.linapp.fun": {
+      "short_name": "6page",
+      "display_name": "📋 六页纸在线课堂",
+      "title": "六页纸在线课堂",
+      "description": "在线教育系统，提供课程管理、考试测评、学习跟踪服务",
+      "enabled": true,
+      "icon": "📋",
+      "color": "linear-gradient(45deg, #607D8B, #455A64)"
+    },
+    "dianbo.linapp.fun": {
+      "short_name": "dianbo",
+      "display_name": "📻 多媒体点播",
+      "title": "多媒体点播",
+      "description": "多媒体内容管理平台，支持在线播放和内容分发服务",
+      "enabled": false,
+      "icon": "📻",
+      "color": "linear-gradient(45deg, #795548, #5D4037)",
+      "note": "暂时不加入统计"
+    }
+  },
+  "metadata": {
+    "last_updated": "2025-09-04T12:00:00Z",
+    "version": "1.0",
+    "description": "LinApp域名配置文件",
+    "author": "LinApp System"
+  }
+}

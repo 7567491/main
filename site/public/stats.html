@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinApp - 实时访问统计</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-title p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .refresh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .refresh-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .update-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.05);
+            border-radius: 5px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .stats-container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">LinApp 统计中心</div>
+            <a href="/" class="back-btn">🏠 返回主页</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>📊 实时访问统计</h1>
+            <p>专业的数据分析与可视化平台</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="refresh-header">
+                <h2>过去7天 + 24小时访问统计</h2>
+                <button class="refresh-btn" onclick="loadStats()">🔄 刷新数据</button>
+            </div>
+            
+            <div id="loading" class="loading">正在加载统计数据...</div>
+            <div id="error" class="error" style="display:none;">数据加载失败，正在重试...</div>
+
+            <div id="statsContent" style="display:none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalVisits24h">--</div>
+                        <div class="stat-label">24小时访问量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalVisits7d">--</div>
+                        <div class="stat-label">7天总访问量</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="todayGrowth">--</div>
+                        <div class="stat-label">今日增长</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="peakHour">--:--</div>
+                        <div class="stat-label">访问高峰 (<span id="peakCount">--</span>次)</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" style="margin-bottom: 1rem;">
+                    <h3>🕐 过去24小时访问分布</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>📊 过去7天访问趋势</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="update-info">
+                    <div>📅 最后更新: <span id="lastUpdate">--</span></div>
+                    <div style="margin-top: 0.3rem;">⏰ 自动刷新: 每60秒 | 平均每日: <span id="avgDaily">--</span> 访问</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoUpdateInterval = null;
+        let hourlyChart = null;
+        let dailyChart = null;
+
+        // 获取最新统计数据
+        async function fetchLatestStats() {
+            try {
+                // 获取日志目录列表
+                const response = await fetch('/logs/', {
+                    method: 'GET',
+                    headers: {'Accept': 'application/json'}
+                });
+                
+                if (!response.ok) throw new Error('无法访问日志目录');
+                
+                const html = await response.text();
+                
+                // 解析HTML找到最新的stats文件
+                const statsFiles = html.match(/stats_\d{8}_\d{4}\.json/g) || [];
+                if (statsFiles.length === 0) throw new Error('未找到统计文件');
+                
+                // 获取最新文件
+                const latestFile = statsFiles.sort().reverse()[0];
+                
+                // 加载统计数据
+                const statsResponse = await fetch(`/logs/${latestFile}`);
+                if (!statsResponse.ok) throw new Error('无法加载统计数据');
+                
+                const data = await statsResponse.json();
+                return data;
+                
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                throw error;
+            }
+        }
+
+        // 更新页面数据
+        function updatePage(data) {
+            // 更新摘要数据
+            document.getElementById('totalVisits24h').textContent = data.summary.total_visits_24h?.toLocaleString() || '--';
+            document.getElementById('totalVisits7d').textContent = data.summary.total_visits_7d?.toLocaleString() || '--';
+            document.getElementById('todayGrowth').textContent = data.summary.growth_trend || '--';
+            document.getElementById('peakHour').textContent = data.summary.peak_hour || '--';
+            document.getElementById('peakCount').textContent = data.summary.peak_count || '--';
+            document.getElementById('lastUpdate').textContent = data.summary.last_update || '--';
+            document.getElementById('avgDaily').textContent = data.summary.avg_daily?.toLocaleString() || '--';
+
+            // 创建7天趋势图
+            if (data.daily_data && data.daily_data.length > 0) {
+                createDailyChart(data.daily_data);
+            }
+
+            // 创建24小时图表
+            if (data.hourly_data && data.hourly_data.length > 0) {
+                createHourlyChart(data.hourly_data);
+            }
+
+            // 显示内容，隐藏加载状态
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('statsContent').style.display = 'block';
+        }
+
+        // 创建7天趋势图
+        function createDailyChart(dailyData) {
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+            
+            const labels = dailyData.map(item => item.label);
+            const data = dailyData.map(item => item.count);
+            
+            dailyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '每日访问量',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            ticks: { 
+                                color: '#666',
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            ticks: { color: '#666' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 创建24小时图表
+        function createHourlyChart(hourlyData) {
+            const ctx = document.getElementById('hourlyChart').getContext('2d');
+            
+            if (hourlyChart) {
+                hourlyChart.destroy();
+            }
+            
+            const labels = hourlyData.map(item => String(item.hour).padStart(2, '0') + ':00');
+            const data = hourlyData.map(item => item.count);
+            
+            hourlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '每小时访问',
+                        data: data,
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#764ba2',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            ticks: { 
+                                color: '#666',
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            ticks: { color: '#666' }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        // 加载数据
+        async function loadStats() {
+            try {
+                // 显示加载状态
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('statsContent').style.display = 'none';
+                
+                const data = await fetchLatestStats();
+                updatePage(data);
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('statsContent').style.display = 'none';
+                console.error('加载失败:', error);
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            
+            // 开启自动更新，每60秒刷新一次
+            autoUpdateInterval = setInterval(loadStats, 60000);
+        });
+
+        // 页面卸载时清理定时器
+        window.addEventListener('beforeunload', function() {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+                autoUpdateInterval = null;
+            }
+        });
+    </script>
+</body>
+</html>

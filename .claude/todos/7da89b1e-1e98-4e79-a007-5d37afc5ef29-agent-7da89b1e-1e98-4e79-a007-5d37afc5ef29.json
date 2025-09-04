@@ -1,0 +1,27 @@
+[
+  {
+    "content": "检查现有stats.html页面状态",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "移除主页的弹窗式统计面板",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "修改主页统计按钮链接到独立页面",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "创建完整的独立统计页面",
+    "status": "completed",
+    "id": "4"
+  },
+  {
+    "content": "更新CLAUDE.md文档说明",
+    "status": "completed",
+    "id": "5"
+  }
+]

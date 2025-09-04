@@ -1,0 +1,32 @@
+[
+  {
+    "content": "分析主页更新脚本，找出重复卡片的根本原因",
+    "status": "completed",
+    "id": "analyze_scripts"
+  },
+  {
+    "content": "检查update_homepage_simple.py脚本的更新逻辑",
+    "status": "completed",
+    "id": "check_update_logic"
+  },
+  {
+    "content": "检查hourly_update.sh调度脚本",
+    "status": "completed",
+    "id": "check_hourly_script"
+  },
+  {
+    "content": "确定导致重复的具体原因",
+    "status": "completed",
+    "id": "identify_root_cause"
+  },
+  {
+    "content": "修复脚本避免重复问题",
+    "status": "completed",
+    "id": "fix_scripts"
+  },
+  {
+    "content": "测试防止重复的机制",
+    "status": "completed",
+    "id": "test_prevention"
+  }
+]

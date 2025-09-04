@@ -1,0 +1,32 @@
+[
+  {
+    "content": "检查当前Nginx配置",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "检查是否已安装certbot",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "获取SSL证书",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "更新Nginx配置支持HTTPS",
+    "status": "completed",
+    "id": "4"
+  },
+  {
+    "content": "重启Nginx服务",
+    "status": "completed",
+    "id": "5"
+  },
+  {
+    "content": "验证SSL证书工作正常",
+    "status": "completed",
+    "id": "6"
+  }
+]

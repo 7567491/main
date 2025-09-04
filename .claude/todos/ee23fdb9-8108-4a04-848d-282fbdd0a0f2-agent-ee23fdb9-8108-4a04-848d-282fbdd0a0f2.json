@@ -1,0 +1,22 @@
+[
+  {
+    "content": "创建统一的域名配置JSON文件",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "更新update_homepage_simple.py使用JSON配置",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "更新domain_stats_ranking.sh使用JSON配置",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "测试新的配置系统是否正常工作",
+    "status": "completed",
+    "id": "4"
+  }
+]
