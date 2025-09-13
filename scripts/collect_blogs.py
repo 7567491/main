@@ -60,12 +60,12 @@ class BlogCollector:
         }
         self.excluded_dirs = {'log', 'webclick', 'pic'}
         
-        # 技术分类关键词 - 重组为四个主要分类
+        # 技术分类关键词 - 四个主要分类
         self.categories = {
-            'AI技术': ['ai', 'claude', 'tts', 'voice', 'machine-learning', 'ai-projects'],
-            '架构设计': ['architecture', 'system', 'design', 'tech-blog', 'ssl', 'qcp'],
-            '广告技术': ['adtech', 'dsp', 'adx', 'rtb', 'sx'],
-            '管理技术': ['management', 'paper', 'pdf', 'meituan', 'product', 'streamlit', 'prfaq', 'git', 'lincon', 'mig', 'others']
+            '编程体验': ['git', 'mig', 'product', 'streamlit', 'lincon', 'management'],
+            '广告科技': ['adtech', 'dsp', 'adx', 'rtb', 'sx'],  
+            'AI技术': ['ai', 'claude', 'tts', 'voice', 'machine-learning', 'ai-projects', 'meituan', 'paper'],
+            'AI运维': ['ssl', 'architecture', 'system', 'design', 'tech-blog', 'qcp', 'pdf', 'prfaq', 'others']
         }
     
     def extract_content_from_html(self, file_path):

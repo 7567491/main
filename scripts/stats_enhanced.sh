@@ -1,24 +1,74 @@
 #!/bin/bash
 
-# 增强版访问统计脚本 - 支持24小时+7天统计
+# 增强版访问统计脚本 - 支持24小时+7天统计（包含所有启用域名）
 LOG_DIR="/home/main/logs"
 NGINX_LOG="/var/log/nginx/access.log"
+DOMAINS_CONFIG="/home/main/data/domains_config.json"
 TIMESTAMP=$(date +"%Y%m%d_%H%M")
 OUTPUT_FILE="$LOG_DIR/stats_$TIMESTAMP.json"
 
 # 确保日志目录存在
 mkdir -p "$LOG_DIR"
 
-echo "生成7天+24小时访问统计..." > "$LOG_DIR/process.log"
+# 获取启用的域名列表
+get_enabled_domains() {
+    if [[ -f "$DOMAINS_CONFIG" ]]; then
+        python3 -c "
+import json
+with open('$DOMAINS_CONFIG', 'r') as f:
+    config = json.load(f)
+    for domain, info in config['domains'].items():
+        if info.get('enabled', False):
+            print(domain)
+"
+    fi
+}
+
+# 获取所有相关日志文件的内容
+get_all_logs() {
+    local time_filter="$1"
+    
+    # 主域名日志（只统计首页访问）
+    {
+        cat "$NGINX_LOG" 2>/dev/null
+        cat /var/log/nginx/access.log.1 2>/dev/null
+        # 尝试获取更多历史日志
+        find /var/log/nginx/ -name "access.log*" -type f 2>/dev/null | while read logfile; do
+            if [[ $logfile =~ \.gz$ ]]; then
+                zcat "$logfile" 2>/dev/null | head -1000
+            else
+                cat "$logfile" 2>/dev/null | head -1000
+            fi
+        done
+    } | grep -E "GET / HTTP"
+    
+    # 启用的二级域名日志（统计所有访问，主要是首页）
+    get_enabled_domains | while read domain; do
+        domain_log="/var/log/nginx/${domain}.access.log"
+        if [[ -f "$domain_log" ]]; then
+            {
+                cat "$domain_log" 2>/dev/null
+                cat "${domain_log}.1" 2>/dev/null
+                # 获取该域名的历史日志
+                find /var/log/nginx/ -name "${domain}.access.log*" -type f 2>/dev/null | while read logfile; do
+                    if [[ $logfile =~ \.gz$ ]]; then
+                        zcat "$logfile" 2>/dev/null | head -500
+                    else
+                        cat "$logfile" 2>/dev/null | head -500
+                    fi
+                done
+            } | grep -E "GET /"
+        fi
+    done
+}
+
+echo "生成全域名7天+24小时访问统计..." > "$LOG_DIR/process.log"
 
 # === 24小时每小时统计（从当前时间往前推24小时） ===
 current_timestamp=$(date +%s)
 start_timestamp=$((current_timestamp - 86400))  # 24小时前的时间戳
 
-{
-    cat "$NGINX_LOG" 2>/dev/null
-    cat /var/log/nginx/access.log.1 2>/dev/null
-} | grep -E "GET / HTTP" | \
+get_all_logs | \
 awk -v start_ts="$start_timestamp" -v current_ts="$current_timestamp" '
 {
     # 提取时间戳 [dd/Mon/yyyy:hh:mm:ss +timezone]
@@ -53,18 +103,7 @@ END {
 }' | sort -k2 -n > /tmp/hourly_raw.txt
 
 # === 7天每日统计 ===
-{
-    cat "$NGINX_LOG" 2>/dev/null
-    cat /var/log/nginx/access.log.1 2>/dev/null  
-    # 尝试获取更多历史日志
-    find /var/log/nginx/ -name "access.log*" -type f 2>/dev/null | while read logfile; do
-        if [[ $logfile =~ \.gz$ ]]; then
-            zcat "$logfile" 2>/dev/null | head -1000
-        else
-            cat "$logfile" 2>/dev/null | head -1000
-        fi
-    done
-} | grep -E "GET / HTTP" | \
+get_all_logs | \
 awk '
 BEGIN {
     # 获取今天和过去6天的日期
@@ -195,7 +234,7 @@ cat >> "$OUTPUT_FILE" << EOF
 "yesterday_visits":$yesterday_visits,
 "growth_trend":"$growth_text",
 "last_update":"$(date '+%Y-%m-%d %H:%M')",
-"period":"过去7天+24小时"
+"period":"全域名过去7天+24小时"
 },
 "timestamp":"$TIMESTAMP"
 }
@@ -210,6 +249,11 @@ rm -f /tmp/hourly_raw.txt /tmp/daily_raw.txt
 # 同步到www存储桶的log目录
 mkdir -p "/mnt/www/log/" 2>/dev/null || true
 cp "$OUTPUT_FILE" "/mnt/www/log/" 2>/dev/null || true
+
+# 更新最新统计文件的符号链接
+if [[ -f "/mnt/www/log/$(basename "$OUTPUT_FILE")" ]]; then
+    ln -sf "$(basename "$OUTPUT_FILE")" "/mnt/www/log/latest_stats.json"
+fi
 
 echo "$(date): Enhanced stats generated - $OUTPUT_FILE" >> "$LOG_DIR/process.log"
 echo "  24h total: $total_24h visits, 7d total: $total_7d visits" >> "$LOG_DIR/process.log"

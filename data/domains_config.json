@@ -54,18 +54,27 @@
       "short_name": "meet",
       "display_name": "📱 会议室预订系统",
       "title": "会议室预订系统",
-      "description": "会议室预订系统",
+      "description": "智能会议室管理平台，支持在线预订、实时状态查询和冲突检测",
       "port": 8000,
       "enabled": true,
       "icon": "📱",
       "color": "linear-gradient(45deg, #FF5722, #D84315)"
+    },
+    "6.linapp.fun": {
+      "short_name": "6",
+      "display_name": "📋 六页纸在线课堂",
+      "title": "六页纸在线课堂",
+      "description": "在线教育系统，提供课程管理、考试测评、学习跟踪服务",
+      "enabled": false,
+      "icon": "📋",
+      "color": "linear-gradient(45deg, #607D8B, #455A64)"
     },
     "6page.linapp.fun": {
       "short_name": "6page",
       "display_name": "📋 六页纸在线课堂",
       "title": "六页纸在线课堂",
       "description": "在线教育系统，提供课程管理、考试测评、学习跟踪服务",
-      "enabled": true,
+      "enabled": false,
       "icon": "📋",
       "color": "linear-gradient(45deg, #607D8B, #455A64)"
     },
@@ -78,6 +87,34 @@
       "icon": "📻",
       "color": "linear-gradient(45deg, #795548, #5D4037)",
       "note": "暂时不加入统计"
+    },
+    "stock.linapp.fun": {
+      "short_name": "stock",
+      "display_name": "📈 股票分析",
+      "title": "股票分析",
+      "description": "股票分析-A股/H股差异分析和投资推荐",
+      "port": 8080,
+      "enabled": false,
+      "icon": "📈",
+      "color": "linear-gradient(45deg, #E91E63, #C2185B)"
+    },
+    "6-v1.linapp.fun": {
+      "short_name": "6-v1",
+      "display_name": "🎯 6-v1工具平台",
+      "title": "6-v1工具平台",
+      "description": "专业工具平台，提供高效的在线服务解决方案",
+      "enabled": false,
+      "icon": "🎯",
+      "color": "linear-gradient(45deg, #FF5722, #D84315)"
+    },
+    "ah.linapp.fun": {
+      "short_name": "ah",
+      "display_name": "⚡ A股H股分析",
+      "title": "A股H股分析",
+      "description": "量化分析两市，通过回测给出投资建议",
+      "enabled": true,
+      "icon": "⚡",
+      "color": "linear-gradient(45deg, #9C27B0, #7B1FA2)"
     }
   },
   "metadata": {

@@ -140,7 +140,7 @@ def update_homepage(top7_data, domains_config):
         else:
             div_count -= 1
             if div_count == 0:
-                grid_end_pos = next_div_close + 6  # 包含 </div>
+                grid_end_pos = next_div_close  # 指向 </div> 的开始位置
                 break
             search_pos = next_div_close + 6
     
