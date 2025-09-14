@@ -567,7 +567,11 @@
         function updateSecurityInfo(attackData) {
             const container = document.getElementById('securityInfo');
             
-            if (!attackData.top_ips || attackData.top_ips.length === 0) {
+            // 检查新数据格式
+            const hasThreatIps = attackData.threat_ips && attackData.threat_ips.length > 0;
+            const hasNormalIps = attackData.normal_ips && attackData.normal_ips.length > 0;
+            
+            if (!hasThreatIps && !hasNormalIps) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #666; padding: 2rem;">
                         暂无安全数据
@@ -584,88 +588,133 @@
                         <span style="background: #e3f2fd; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
                             🔍 分析IP: ${summary.total_unique_ips || 0}个
                         </span>
-                        <span style="background: #ffecb3; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
-                            ⚠️ 可疑IP: ${summary.suspicious_count || 0}个
-                        </span>
                         <span style="background: #ffcdd2; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
-                            🚫 已封禁: ${summary.banned_count || 0}个
+                            ⚠️ 威胁IP: ${summary.threat_count || 0}个
                         </span>
                         <span style="background: #c8e6c9; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
                             ✅ 正常IP: ${summary.normal_count || 0}个
                         </span>
                     </div>
                 </div>
-                
-                <div style="background: #f8f9fa; border-radius: 8px; padding: 1rem;">
-                    <h4 style="margin-bottom: 1rem; color: #333; font-size: 1rem;">📋 访问量前5的IP地址</h4>
             `;
             
-            attackData.top_ips.slice(0, 5).forEach((ip, index) => {
-                const threatColor = {
-                    '高危': '#d32f2f',
-                    '可疑': '#ff9800', 
-                    '正常': '#4caf50'
-                }[ip.threat_level] || '#666';
-                
-                const statusColor = ip.banned_status === '已封禁' ? '#d32f2f' : '#4caf50';
-                
-                // 安全状态图标
-                const statusIcon = ip.banned_status === '已封禁' ? '🚫' : '✅';
-                
-                // 地理位置图标
-                const locationIcon = ip.location.includes('内网') ? '🏠' :
-                                  ip.location.includes('本地') ? '💻' :
-                                  ip.location.includes('美国') ? '🇺🇸' :
-                                  ip.location.includes('欧洲') ? '🇪🇺' :
-                                  ip.location.includes('Cloudflare') ? '☁️' :
-                                  ip.location.includes('AWS') ? '☁️' : '🌍';
-                
-                // 安全备注显示
-                const securityNotes = ip.security_notes && ip.security_notes.length > 0 ?
-                    ip.security_notes.map(note => `<span style="font-size: 0.7rem; color: #666; font-style: italic;">${note}</span>`).join(' ') : '';
-                
+            // 威胁IP表格
+            if (hasThreatIps) {
                 html += `
-                    <div style="margin-bottom: 0.8rem; padding: 0.8rem; background: white; border-radius: 6px; border-left: 4px solid ${threatColor};">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.3rem;">
-                                    <strong style="font-family: monospace; font-size: 0.95rem;">${ip.ip}</strong>
-                                    <span style="background: #f5f5f5; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
-                                        ${ip.request_count}次访问
-                                    </span>
-                                    <span style="color: ${threatColor}; font-size: 0.8rem; font-weight: bold;">
-                                        ${ip.threat_level}
-                                    </span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.8rem; font-size: 0.8rem;">
-                                    <span style="color: #666;">
-                                        ${locationIcon} ${ip.location}
-                                    </span>
-                                    <span style="color: ${statusColor}; font-weight: bold;">
-                                        ${statusIcon} ${ip.banned_status}
-                                    </span>
-                                    ${securityNotes}
-                                </div>
-                                ${ip.threat_level !== '正常' ? `
-                                <div style="margin-top: 0.4rem; padding: 0.3rem; background: #fafafa; border-radius: 4px; font-size: 0.75rem; color: #666;">
-                                    <strong>攻击模式:</strong> ${ip.sample_requests && ip.sample_requests.length > 0 ? 
-                                        ip.sample_requests.slice(0, 2).map(req => req.replace(/^(GET|POST|PUT|DELETE)\\s+/, '')).join(', ') : 
-                                        '无明显攻击模式'}
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    </div>
+                    <div style="background: #fff5f5; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #ffebee;">
+                        <h4 style="margin-bottom: 1rem; color: #d32f2f; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            🚨 威胁IP地址 (显示${attackData.threat_ips.length}个)
+                        </h4>
                 `;
-            });
+                
+                attackData.threat_ips.forEach((ip, index) => {
+                    html += generateIpCard(ip, '#d32f2f');
+                });
+                
+                html += '</div>';
+            }
+            
+            // 正常IP表格
+            if (hasNormalIps) {
+                html += `
+                    <div style="background: #f8fffe; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e8f5e8;">
+                        <h4 style="margin-bottom: 1rem; color: #2e7d32; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            ✅ 正常访问IP (显示${attackData.normal_ips.length}个)
+                        </h4>
+                `;
+                
+                attackData.normal_ips.forEach((ip, index) => {
+                    html += generateIpCard(ip, '#4caf50');
+                });
+                
+                html += '</div>';
+            }
             
             html += `
-                </div>
                 <div style="text-align: center; color: #666; font-size: 0.8rem; margin-top: 1rem;">
                     最后更新: ${summary.last_update || '--'} | 分析周期: ${summary.analysis_period || '过去24小时'}
                 </div>
             `;
             
             container.innerHTML = html;
+        }
+        
+        // 生成IP卡片的辅助函数
+        function generateIpCard(ip, defaultColor) {
+            const threatColor = {
+                '高危': '#d32f2f',
+                '可疑': '#ff9800', 
+                '正常': '#4caf50'
+            }[ip.threat_level] || defaultColor;
+            
+            const statusColor = ip.banned_status === '已封禁' ? '#d32f2f' : '#4caf50';
+            
+            // 安全状态图标
+            const statusIcon = ip.banned_status === '已封禁' ? '🚫' : '✅';
+            
+            // 地理位置图标
+            const locationIcon = getLocationIcon(ip.location);
+            
+            // 安全备注显示
+            const securityNotes = ip.security_notes && ip.security_notes.length > 0 ?
+                ip.security_notes.map(note => `<span style="font-size: 0.7rem; color: #666; font-style: italic;">${note}</span>`).join(' ') : '';
+            
+            // 攻击原因显示
+            const attackReasons = ip.attack_reasons && ip.attack_reasons.length > 0 ?
+                ip.attack_reasons.join(', ') : '';
+            
+            return `
+                <div style="margin-bottom: 0.8rem; padding: 0.8rem; background: white; border-radius: 6px; border-left: 4px solid ${threatColor}; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.3rem; flex-wrap: wrap;">
+                                <strong style="font-family: monospace; font-size: 0.95rem;">${ip.ip}</strong>
+                                <span style="background: #f5f5f5; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
+                                    ${ip.request_count}次访问
+                                </span>
+                                <span style="color: ${threatColor}; font-size: 0.8rem; font-weight: bold;">
+                                    ${ip.threat_level}
+                                </span>
+                                ${ip.attack_score > 0 ? `<span style="background: #ffecb3; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; color: #e65100;">攻击评分: ${ip.attack_score}</span>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.8rem; font-size: 0.8rem; margin-bottom: 0.3rem; flex-wrap: wrap;">
+                                <span style="color: #666;">
+                                    ${locationIcon} ${ip.location}
+                                </span>
+                                <span style="color: ${statusColor}; font-weight: bold;">
+                                    ${statusIcon} ${ip.banned_status}
+                                </span>
+                                ${securityNotes}
+                            </div>
+                            ${attackReasons ? `
+                            <div style="margin-top: 0.4rem; padding: 0.3rem; background: #fafafa; border-radius: 4px; font-size: 0.75rem; color: #666;">
+                                <strong>攻击模式:</strong> ${attackReasons}
+                            </div>` : ''}
+                            ${ip.sample_requests && ip.sample_requests.length > 0 && ip.sample_requests.some(req => req.trim()) ? `
+                            <div style="margin-top: 0.4rem; padding: 0.3rem; background: #f0f0f0; border-radius: 4px; font-size: 0.75rem; color: #555; font-family: monospace;">
+                                <strong>请求样本:</strong> ${ip.sample_requests.filter(req => req.trim()).slice(0, 2).map(req => req.replace(/^(GET|POST|PUT|DELETE)\\s+/, '')).join(', ')}
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 获取地理位置图标的辅助函数
+        function getLocationIcon(location) {
+            if (location.includes('内网') || location.includes('IP Address not found')) return '🏠';
+            if (location.includes('本地')) return '💻';
+            if (location.includes('CN-') || location.includes('China')) return '🇨🇳';
+            if (location.includes('US-') || location.includes('United States')) return '🇺🇸';
+            if (location.includes('HK-') || location.includes('Hong Kong')) return '🇭🇰';
+            if (location.includes('SG-') || location.includes('Singapore')) return '🇸🇬';
+            if (location.includes('NL-') || location.includes('Netherlands')) return '🇳🇱';
+            if (location.includes('LT-') || location.includes('Lithuania')) return '🇱🇹';
+            if (location.includes('SO-') || location.includes('Somalia')) return '🇸🇴';
+            if (location.includes('欧洲')) return '🇪🇺';
+            if (location.includes('Cloudflare')) return '☁️';
+            if (location.includes('AWS') || location.includes('Amazon')) return '☁️';
+            return '🌍';
         }
 
         // 加载数据
