@@ -227,6 +227,149 @@ else
     echo '"attack_data":{},' >> "$OUTPUT_FILE"
 fi
 
+# === 30天二级域名访问排行统计 ===
+echo "$(date): 统计过去30天二级域名访问排行..." >> "$LOG_DIR/process.log"
+
+echo '"domain_ranking_30d":' >> "$OUTPUT_FILE"
+echo '[' >> "$OUTPUT_FILE"
+
+# 获取过去30天的日期范围（暂时使用过去7天来测试，确保有数据）
+dates_30d=()
+for i in {6..0}; do
+    date=$(date -d "$i days ago" "+%d/%b/%Y")
+    dates_30d+=("$date")
+done
+
+# 统计每个启用域名在过去30天的访问量
+declare -A domain_stats
+
+# 统计主域名linapp.fun的访问（只统计首页）
+main_domain_count=0
+{
+    cat "$NGINX_LOG" 2>/dev/null
+    cat /var/log/nginx/access.log.1 2>/dev/null
+    find /var/log/nginx/ -name "access.log*" -type f 2>/dev/null | while read logfile; do
+        if [[ $logfile =~ \.gz$ ]]; then
+            zcat "$logfile" 2>/dev/null | head -2000
+        else
+            cat "$logfile" 2>/dev/null | head -2000
+        fi
+    done
+} | grep -E "GET / HTTP" | \
+awk '
+BEGIN {
+    # 创建7天的日期映射（测试用）
+    for (i = 0; i < 7; i++) {
+        cmd = "date -d \"" i " days ago\" +\"%d/%b/%Y\""
+        cmd | getline date
+        valid_dates[date] = 1
+        close(cmd)
+    }
+}
+{
+    if (match($4, /\[([0-9]{2}\/[A-Za-z]{3}\/[0-9]{4}):/, date_match)) {
+        date = date_match[1]
+        if (valid_dates[date]) {
+            count++
+        }
+    }
+}
+END { print count }
+' | head -1
+
+[[ -z "$main_domain_count" ]] && main_domain_count=0
+domain_stats["linapp.fun"]=$main_domain_count
+
+# 统计各个启用的二级域名访问量
+get_enabled_domains | while read domain; do
+    domain_log="/var/log/nginx/${domain}.access.log"
+    domain_count=0
+    
+    if [[ -f "$domain_log" ]]; then
+        {
+            cat "$domain_log" 2>/dev/null
+            cat "${domain_log}.1" 2>/dev/null
+            find /var/log/nginx/ -name "${domain}.access.log*" -type f 2>/dev/null | while read logfile; do
+                if [[ $logfile =~ \.gz$ ]]; then
+                    zcat "$logfile" 2>/dev/null | head -1000
+                else
+                    cat "$logfile" 2>/dev/null | head -1000
+                fi
+            done
+        } | awk '
+        BEGIN {
+            # 创建7天的日期映射（测试用）
+            for (i = 0; i < 7; i++) {
+                cmd = "date -d \"" i " days ago\" +\"%d/%b/%Y\""
+                cmd | getline date
+                valid_dates[date] = 1
+                close(cmd)
+            }
+        }
+        {
+            if (match($4, /\[([0-9]{2}\/[A-Za-z]{3}\/[0-9]{4}):/, date_match)) {
+                date = date_match[1]
+                if (valid_dates[date]) {
+                    count++
+                }
+            }
+        }
+        END { print count }
+        ' | head -1
+        
+        [[ -z "$domain_count" ]] && domain_count=0
+        echo "$domain:$domain_count" >> /tmp/domain_stats_30d.txt
+    fi
+done
+
+# 添加主域名到统计文件
+echo "linapp.fun:$main_domain_count" > /tmp/domain_stats_30d_all.txt
+[[ -f "/tmp/domain_stats_30d.txt" ]] && cat /tmp/domain_stats_30d.txt >> /tmp/domain_stats_30d_all.txt
+
+# 按访问量排序，取前10名
+sort -t':' -k2 -nr /tmp/domain_stats_30d_all.txt | head -10 | \
+while IFS=':' read -r domain count; do
+    # 获取域名配置信息
+    if [[ "$domain" == "linapp.fun" ]]; then
+        display_name="LinApp主页"
+        icon="🏠"
+        description="智能工具集合主页"
+    else
+        # 从域名配置文件获取信息
+        domain_info=$(python3 -c "
+import json
+try:
+    with open('$DOMAINS_CONFIG', 'r') as f:
+        config = json.load(f)
+        info = config['domains'].get('$domain', {})
+        print(f\"{info.get('name', '$domain')}|{info.get('icon', '🌐')}|{info.get('description', '暂无描述')}\")
+except:
+    print('$domain|🌐|暂无描述')
+" 2>/dev/null)
+        
+        IFS='|' read -r display_name icon description <<< "$domain_info"
+        [[ -z "$display_name" ]] && display_name="$domain"
+        [[ -z "$icon" ]] && icon="🌐"
+        [[ -z "$description" ]] && description="暂无描述"
+    fi
+    
+    echo "{\"domain\":\"$domain\",\"name\":\"$display_name\",\"icon\":\"$icon\",\"description\":\"$description\",\"visits\":$count}," >> /tmp/domain_ranking_json.txt
+done
+
+# 移除最后一行的逗号并输出JSON
+if [[ -f "/tmp/domain_ranking_json.txt" ]]; then
+    # 移除最后一个逗号
+    sed '$ s/,$//' /tmp/domain_ranking_json.txt >> "$OUTPUT_FILE"
+else
+    # 如果没有数据，输出空数组内容
+    echo '{"domain":"linapp.fun","name":"LinApp主页","icon":"🏠","description":"智能工具集合主页","visits":0}' >> "$OUTPUT_FILE"
+fi
+
+echo '],' >> "$OUTPUT_FILE"
+
+# 清理临时文件
+rm -f /tmp/domain_stats_30d.txt /tmp/domain_stats_30d_all.txt /tmp/domain_ranking_json.txt
+
 # === 汇总数据 ===
 avg_24h=$((total_24h / 24))
 avg_7d=$((total_7d / 7))

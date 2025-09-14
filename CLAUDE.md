@@ -108,13 +108,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - **实时数据**: 当前小时访问量、最后更新时间、自动化状态
 
 ### 智能安全防护系统
+- **IP威胁分析脚本**: `/home/main/scripts/attack_analysis.sh` - 过去24小时IP威胁智能分析和分类
 - **实时监控脚本**: `/home/main/scripts/realtime_security_monitor.sh` - 每小时04分和34分执行，30分钟内检测威胁
 - **每日深度扫描**: `/home/main/scripts/security_scan.sh` - 每日凌晨4点自动执行恶意IP检测
 - **安全管理工具**: `/home/main/scripts/security_manager.sh` - 手动管理IP黑名单
+- **威胁分析数据**: `/home/main/logs/attack_analysis_24h.json` - 24小时IP威胁分析结果，包含威胁IP和正常IP分类
 - **实时监控日志**: `/home/main/logs/realtime_security.log` - 实时威胁检测记录
 - **每日扫描日志**: `/home/main/logs/security_scan.log` - 深度扫描日志
 - **封禁记录**: `/home/main/logs/banned_ips.log` - IP封禁历史
 - **多层防护架构**:
+  - **威胁分析层**: 智能IP分类，威胁IP按攻击评分排序，正常IP按访问量展示
   - **实时监控层**: 每30分钟检测，检测延迟从7小时缩短至30分钟
   - **深度扫描层**: 每日全面安全审计，长期威胁分析
   - **自动封禁层**: 检测到威胁立即执行iptables封禁
@@ -125,12 +128,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - 代码注入检测 (allow_url_include, php://input, base64_decode)
   - 恶意工具检测 (Go-http-client, zgrab, nmap, sqlmap, masscan)
   - 高频访问检测 (单IP 30分钟内超过100次请求)
+- **IP威胁分析特性**:
+  - **智能分类**: 封禁IP归类为威胁，未封禁IP归类为正常
+  - **威胁IP展示**: 显示前5个威胁IP，按攻击评分从高到低排序
+  - **正常IP展示**: 显示前10个正常访问IP，显示访问次数
+  - **关键安全统计**: 总IP数、被封禁IP数、24小时活跃IP数、封禁率等关键指标
+  - **地理位置**: 自动获取IP地理位置信息
+  - **实时更新**: 统计页面集成威胁分析数据，实时展示安全状态
 - **自动化机制**: 
+  - 威胁分析：集成到统计系统，每小时30分自动执行
   - 实时监控：每小时04分和34分自动执行
   - 深度扫描：每日4:00执行全面安全审计
   - iptables规则持久化，重启后保持生效
 - **Nginx增强防护**: User-Agent过滤、路径遍历阻止、代码注入防护
-- **当前防护状态**: 已封禁17个恶意IP，实时+深度双重防护已激活
+- **当前防护状态**: 已封禁70个恶意IP，威胁分析+实时监控+深度扫描三重防护体系已激活
 
 ### s.linapp.fun 静态文件浏览系统
 - **主脚本**: `/home/main/scripts/html_stats.sh` - 每5分钟自动执行HTML文件统计和访问日志分析

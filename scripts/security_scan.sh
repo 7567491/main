@@ -10,6 +10,9 @@ NGINX_LOG="/var/log/nginx/access.log"
 TEMP_DIR="/tmp/security_scan"
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
+# 注意：不再使用CDN白名单，因为攻击者可以通过CDN服务伪装攻击
+# 基于实际行为模式判断是否为恶意IP
+
 # 创建必要目录
 mkdir -p "$LOG_DIR" "$TEMP_DIR"
 
@@ -81,7 +84,7 @@ if [ -s "$TEMP_DIR/suspicious_ips.txt" ]; then
     
     while read -r ip; do
         if ! iptables -L INPUT -n | grep -q "$ip"; then
-            # 排除内网IP和正常的CDN/云服务商IP（可根据需要调整）
+            # 排除内网IP
             if [[ ! "$ip" =~ ^(10\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.|127\.) ]]; then
                 echo "$ip" >> "$TEMP_DIR/new_bans.txt"
             fi

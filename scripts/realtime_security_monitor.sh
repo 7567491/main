@@ -12,6 +12,9 @@ DATE=$(date '+%Y-%m-%d %H:%M:%S')
 ALERT_THRESHOLD=50   # 单IP 30分钟内超过50次请求触发警报（从100降低到50）
 MALICIOUS_THRESHOLD=5  # 单IP检测到恶意行为超过5次立即封禁
 
+# 注意：不再使用CDN白名单，因为攻击者可以通过CDN服务伪装攻击
+# 基于实际行为模式判断是否为恶意IP
+
 # 创建必要目录
 mkdir -p "$LOG_DIR" "$TEMP_DIR"
 
