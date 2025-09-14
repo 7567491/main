@@ -200,6 +200,33 @@ done < /tmp/daily_raw.txt
 
 echo '],' >> "$OUTPUT_FILE"
 
+# === CPU和攻击分析数据 ===
+echo "$(date): 收集CPU和攻击分析数据..." >> "$LOG_DIR/process.log"
+
+# 运行CPU监控脚本
+/home/main/scripts/cpu_monitor.sh >/dev/null 2>&1 || true
+
+# 运行攻击分析脚本  
+/home/main/scripts/attack_analysis.sh >/dev/null 2>&1 || true
+
+# 添加CPU数据到JSON
+if [[ -f "/home/main/logs/cpu_usage_24h.json" ]]; then
+    echo '"cpu_data":' >> "$OUTPUT_FILE"
+    cat "/home/main/logs/cpu_usage_24h.json" >> "$OUTPUT_FILE" 2>/dev/null || echo '{}' >> "$OUTPUT_FILE"
+    echo ',' >> "$OUTPUT_FILE"
+else
+    echo '"cpu_data":{},' >> "$OUTPUT_FILE"
+fi
+
+# 添加攻击分析数据到JSON
+if [[ -f "/home/main/logs/attack_analysis_24h.json" ]]; then
+    echo '"attack_data":' >> "$OUTPUT_FILE"
+    cat "/home/main/logs/attack_analysis_24h.json" >> "$OUTPUT_FILE" 2>/dev/null || echo '{}' >> "$OUTPUT_FILE"
+    echo ',' >> "$OUTPUT_FILE"
+else
+    echo '"attack_data":{},' >> "$OUTPUT_FILE"
+fi
+
 # === 汇总数据 ===
 avg_24h=$((total_24h / 24))
 avg_7d=$((total_7d / 7))

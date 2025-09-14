@@ -48,7 +48,7 @@
             background-clip: text;
         }
 
-        .stats-toggle {
+        .stats-toggle, .blog-toggle {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
@@ -57,10 +57,18 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .stats-toggle:hover {
+        .stats-toggle:hover, .blog-toggle:hover {
             transform: translateY(-2px);
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .container {
@@ -180,6 +188,16 @@
                 font-size: 1.5rem;
             }
 
+            .header-buttons {
+                justify-content: center;
+                gap: 0.8rem;
+            }
+
+            .stats-toggle, .blog-toggle {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -205,7 +223,10 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">LinApp</div>
-            <a href="/stats.html" class="stats-toggle">📊 实时访问统计</a>
+            <div class="header-buttons">
+                <a href="https://s.linapp.fun" class="blog-toggle" target="_blank">📝 博客</a>
+                <a href="/stats.html" class="stats-toggle">📊 实时访问统计</a>
+            </div>
         </div>
     </header>
 
